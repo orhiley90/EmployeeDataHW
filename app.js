@@ -33,6 +33,12 @@ inquirer
             type:"prompt",
             name:"email",
             message:"What is your email address?",
+        },
+        {
+            type: "prompt",
+            name: "officeNumber",
+            message:"What is your office number?",
+            when: (answers)=> answers.role==="Manager",
         }
 
     ])
