@@ -1,3 +1,4 @@
+const Employee = require("./lib/Employee");
 const Manager = require("./lib/Manager");
 const Engineer = require("./lib/Engineer");
 const Intern = require("./lib/Intern");
@@ -5,47 +6,152 @@ const inquirer = require("inquirer");
 const path = require("path");
 const fs = require("fs");
 
+let name = "";
+let id = "";
+let role = "";
+let email = "";
+
 const OUTPUT_DIR = path.resolve(__dirname, "output");
 const outputPath = path.join(OUTPUT_DIR, "team.html");
 
 const render = require("./lib/htmlRenderer");
 
+function askQuestions() {
+    inquirer
+        .prompt([
+            {
+                type: "list",
+                name: "role",
+                message: "What type of employee would you like to add?",
+                choices: ["Manager", "Engineer", "Intern"]
+            },
+            {
+                type: "prompt",
+                name: "name",
+                message: "What is the employees name?"
+            },
+            {
+                type: "prompt",
+                name: "id",
+                message: "What is your ID number?"
+            },
+            {
+                type: "prompt",
+                name: "email",
+                message: "What is your email address?",
+            },
+            {
+                type: "prompt",
+                name: "officeNumber",
+                message: "What is your office number?",
+                when: (answers) => answers.role === "Manager",
+            },
+            {
+                type: "prompt",
+                name: "github",
+                message: "What is your github username?",
+                when: (answers) => answers.role === "Engineer",
+            },
+            {
+                type: "prompt",
+                name: "school",
+                message: "What school are you attending?",
+                when: (answers) => answers.role === "Intern",
+            },
+            {
+                type: "list",
+                name: "another",
+                message: "Would you like to add another employee?",
+                choices: ["Yes", "No"]
+            }
+        ])
+        .then(function (response) {
 
-inquirer
-    .prompt([
-        {
-            type: "list",
-            name: "role",
-            message: "What type of employee would you like to add?",
-            choices: ["Manager", "Engineer", "Intern"]
-        },
-        {
-            type: "prompt",
-            name: "name",
-            message: "What is the employees name?"
-        },
-        {
-            type: "prompt",
-            name: "id",
-            message:"What is your ID number?"
-        },
-        {
-            type:"prompt",
-            name:"email",
-            message:"What is your email address?",
-        },
-        {
-            type: "prompt",
-            name: "officeNumber",
-            message:"What is your office number?",
-            when: (answers)=> answers.role==="Manager",
-        }
+            let employees = [];
+            let managers = [];
+            let engineers = [];
+            let interns = [];
+            let another = response.another;
+            console.log(response);
+            let newEmployee = new Employee(response.name, response.id, response.email, response.role);
+            employees.push(newEmployee);
+            if (another === "No") {
 
-    ])
-    .then(function (response) {
-        let newEmployee = Employee(role, name);
-        return newEmployee
-    })
+
+                fs.writeFile("employees.json", "utf8", function (err, newEmployee) {
+                    if (err) {
+                        throw err;
+                    }
+
+                   
+
+
+
+                    // For each element in animal
+                    console.log(employees);
+                    employees.forEach(function (employee) {
+                        console.log(employee.role);
+                        if (employee.role === "Manager") {
+                            console.log("this happened");
+                            
+                            managers.push(employee);
+                            
+                        }
+                        else if (employee.role === "Engineer") {
+                            engineers.push(employee);
+                        }
+                        else if (employee.role === "Intern") {
+                            interns.push(employee);
+                        }
+
+                    });
+                    
+                    
+                    const managersJSON = JSON.stringify(managers, null,2);
+                    console.log(managersJSON);
+                    const engineersJSON = JSON.stringify(engineers, null, 2);
+                    const internsJSON = JSON.stringify(interns, null, 2);
+                   
+
+                    fs.writeFile("managers.json", managersJSON, function (err) {
+                        if (err) {
+                            throw err;
+                        }
+
+                        console.log("Successfully wrote to managers.json file");
+                    });
+                    fs.writeFile("engineers.json", engineersJSON, function (err) {
+                        if (err) {
+                            throw err;
+                        }
+
+                        console.log("Successfully wrote to engineers.json file");
+                    });
+                    fs.writeFile("interns.json", internsJSON, function (err) {
+                        if (err) {
+                            throw err;
+                        }
+
+                        console.log("Successfully wrote to interns.json file");
+                    });
+
+                })
+
+            }
+            else {
+                askQuestions();
+            }
+
+        })
+}
+askQuestions();
+
+
+
+
+
+
+
 // Write code to use inquirer to gather information about the development team members,
 // and to create objects for each team member (using the correct classes as blueprints!)
 
